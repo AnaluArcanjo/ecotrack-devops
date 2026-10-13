@@ -7,7 +7,7 @@
 | **Integrantes** | Ana Luiza Arcanjo — RM 562568 · _(adicione os demais integrantes, se houver)_ |
 | **Turma** | 2TDSOA — FIAP |
 | **Repositório** | `https://github.com/AnaluArcanjo/ecotrack-devops` |
-| **Imagem Docker** | `ghcr.io/analuarcanjo/ecotrack-api` |
+| **Imagem Docker** | `ghcr.io/analuarcanjo/ecotrack-devops` |
 
 A API faz o rastreamento de coleta seletiva, pontos de coleta, alertas de ocupação, notificações e relatórios de impacto ambiental (CO₂ evitado). Arquitetura em camadas (Domain, Application, Infrastructure, API), autenticação JWT, EF Core com migrations e SQL Server.
 
@@ -52,7 +52,7 @@ EcoTrackNet-DevOps/
 ```bash
 # 1. Clonar o repositório
 git clone https://github.com/AnaluArcanjo/ecotrack-devops.git
-cd ecotrack-devops
+cd SEU-REPO
 
 # 2. Criar o arquivo de variáveis de ambiente
 cp .env.example .env
@@ -231,7 +231,7 @@ ENTRYPOINT ["dotnet", "EcoTrack.API.dll"]
 > Os prints ficam em `docs/prints/`. Os logs completos de cada deploy podem ser baixados nos artefatos da execução (`evidencias-staging`, `evidencias-production`, `test-results`).
 
 **Execução completa do pipeline (build → testes → imagem → staging → produção, tudo verde):**
-[https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38460317964
+https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38460317964
 
 | Job | Link |
 |---|---|
@@ -241,38 +241,28 @@ ENTRYPOINT ["dotnet", "EcoTrack.API.dll"]
 | 🚀 Deploy STAGING | https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38460317964/job/115515132526 |
 | 🏭 Deploy PRODUÇÃO | https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38460317964/job/115515668295 |
 
-Imagem publicada: `ghcr.io/analuarcanjo/ecotrack-devops` (tags `sha-8cfb2e1`, `main`, `latest`, `staging`, `production`).](https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38478812109
-
-| Job | Link |
-|---|---|
-| 🔨 Build | https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38478812109/job/115576054977 |
-| 🧪 Testes automatizados | https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38478812109/job/115576294683 |
-| 🐳 Docker build & push (GHCR) | https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38478812109/job/115576579008 |
-| 🚀 Deploy STAGING | https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38478812109/job/115577333748 |
-| 🏭 Deploy PRODUÇÃO | https://github.com/AnaluArcanjo/ecotrack-devops/actions/runs/38478812109/job/115577694838 |
-
-Imagem publicada: `ghcr.io/analuarcanjo/ecotrack-api` (tags `sha-e0c00f3`, `main`, `latest`, `staging`, `production`).)
+Imagem publicada: `ghcr.io/analuarcanjo/ecotrack-devops` (tags `sha-8cfb2e1`, `main`, `latest`, `staging`, `production`).
 
 ### Pipeline completo (build → testes → docker → staging → produção)
-![Pipeline completo](docs/prints/01-pipeline-completo.png)
+![Pipeline completo](docs\pipeline-completo.png)
 
 ### Build
-![Build](docs/prints/02-build.png)
+![Build](docs\build.png)
 
 ### Testes automatizados
-![Testes](docs/prints/03-testes.png)
+![Testes](docs\testes.png)
 
 ### Imagem Docker publicada no GHCR
-![Imagem GHCR](docs/prints/04-imagem-ghcr.png)
+![GHCR](docs\ghcr.png)
 
 ### Deploy em staging + smoke tests
-![Staging](docs/prints/05-deploy-staging.png)
+![Staging](docs\deploy-staging.png)
 
 ### Deploy em produção + smoke tests
-![Produção](docs/prints/06-deploy-producao.png)
+![Produção](docs\deploy-prod.png)
 
 ### Environments (staging e produção) no GitHub
-![Environments](docs/prints/07-environments.png)
+![Produção](docs\environments.png)
 
 ---
 
