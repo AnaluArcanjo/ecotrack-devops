@@ -1,0 +1,24 @@
+# Override do ambiente de STAGING (homologação)
+# docker compose -p ecotrack-staging --env-file deploy/staging.env \
+#   -f docker-compose.yml -f docker-compose.staging.yml up -d
+services:
+  sqlserver:
+    environment:
+      MSSQL_PID: Express
+    volumes:
+      - sqlserver_data_staging:/var/opt/mssql
+
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+    labels:
+      com.ecotrack.environment: "staging"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+volumes:
+  sqlserver_data_staging:
+    driver: local

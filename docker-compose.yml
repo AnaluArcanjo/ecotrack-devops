@@ -1,0 +1,87 @@
+# =============================================================================
+#  EcoTrack API — Cidades ESG Inteligentes
+#  Orquestração: API .NET 8 + SQL Server 2022
+#
+#  Uso local (build a partir do código):
+#     cp .env.example .env
+#     docker compose up -d --build
+#
+#  Uso por ambiente (imagem publicada no GHCR pelo pipeline):
+#     docker compose -p ecotrack-staging    --env-file deploy/staging.env    \
+#        -f docker-compose.yml -f docker-compose.staging.yml up -d
+#     docker compose -p ecotrack-production --env-file deploy/production.env \
+#        -f docker-compose.yml -f docker-compose.prod.yml    up -d
+# =============================================================================
+
+name: ecotrack
+
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:-EcoTrack@123}
+      MSSQL_PID: ${MSSQL_PID:-Express}
+    ports:
+      - "${DB_PORT:-1433}:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql          # volume nomeado: dados persistem entre deploys
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - backend                                # banco fica só na rede interna
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  api:
+    image: ${API_IMAGE:-ecotrack-api:local}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-local}
+    restart: unless-stopped
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://+:8080
+      APP_VERSION: ${APP_VERSION:-local}
+      AutoMigrate: "true"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=${DB_NAME:-EcoTrackDb};User Id=sa;Password=${SA_PASSWORD:-EcoTrack@123};TrustServerCertificate=True;"
+      JwtSettings__Secret: ${JWT_SECRET:-ecotrack-net-super-secret-key-2026-must-be-at-least-256-bits-long-for-hmac}
+      JwtSettings__Issuer: EcoTrackAPI
+      JwtSettings__Audience: EcoTrackClient
+      JwtSettings__ExpirationMinutes: ${JWT_EXPIRATION_MINUTES:-1440}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - backend                                # fala com o banco
+      - frontend                               # exposta para clientes
+    logging: *default-logging
+
+volumes:
+  sqlserver_data:
+    driver: local
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge

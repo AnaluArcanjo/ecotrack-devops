@@ -1,0 +1,24 @@
+# Override do ambiente de PRODUÇÃO
+# docker compose -p ecotrack-production --env-file deploy/production.env \
+#   -f docker-compose.yml -f docker-compose.prod.yml up -d
+services:
+  sqlserver:
+    restart: always
+    volumes:
+      - sqlserver_data_production:/var/opt/mssql
+
+  api:
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    labels:
+      com.ecotrack.environment: "production"
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+
+volumes:
+  sqlserver_data_production:
+    driver: local

@@ -1,0 +1,434 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-06-18T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v9",
+  "resources": [
+    {
+      "_id": "wrk_ecotrack_net",
+      "_type": "workspace",
+      "name": "EcoTrack .NET API",
+      "description": "ESG Tema 2 - Gestão de Resíduos e Reciclagem (.NET Core 8)"
+    },
+    {
+      "_id": "env_base_net",
+      "_type": "environment",
+      "parentId": "wrk_ecotrack_net",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "token": "",
+        "admin_token": ""
+      }
+    },
+    {
+      "_id": "fld_auth_net",
+      "_type": "request_group",
+      "parentId": "wrk_ecotrack_net",
+      "name": " Autenticação"
+    },
+    {
+      "_id": "req_login_net",
+      "_type": "request",
+      "parentId": "fld_auth_net",
+      "name": "POST /api/auth/login",
+      "method": "POST",
+      "url": "{{ base_url }}/api/auth/login",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@ecotrack.com.br\",\n  \"senha\": \"Admin@123\"\n}"
+      }
+    },
+    {
+      "_id": "req_login_empresa_net",
+      "_type": "request",
+      "parentId": "fld_auth_net",
+      "name": "POST /api/auth/login (Empresa)",
+      "method": "POST",
+      "url": "{{ base_url }}/api/auth/login",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"empresa@exemplo.com.br\",\n  \"senha\": \"Admin@123\"\n}"
+      }
+    },
+    {
+      "_id": "req_cadastro_net",
+      "_type": "request",
+      "parentId": "fld_auth_net",
+      "name": "POST /api/auth/cadastro",
+      "method": "POST",
+      "url": "{{ base_url }}/api/auth/cadastro",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Maria Teste\",\n  \"email\": \"maria@teste.com\",\n  \"senha\": \"Teste123\",\n  \"perfil\": \"Cidadao\"\n}"
+      }
+    },
+    {
+      "_id": "fld_pontos_net",
+      "_type": "request_group",
+      "parentId": "wrk_ecotrack_net",
+      "name": " Pontos de Coleta"
+    },
+    {
+      "_id": "req_pontos_listar_net",
+      "_type": "request",
+      "parentId": "fld_pontos_net",
+      "name": "GET /api/pontos-coleta (paginado)",
+      "method": "GET",
+      "url": "{{ base_url }}/api/pontos-coleta?pageNumber=1&pageSize=10"
+    },
+    {
+      "_id": "req_pontos_filtrar_cidade_net",
+      "_type": "request",
+      "parentId": "fld_pontos_net",
+      "name": "GET /api/pontos-coleta?cidade=São Paulo",
+      "method": "GET",
+      "url": "{{ base_url }}/api/pontos-coleta?cidade=São Paulo&pageNumber=1&pageSize=10"
+    },
+    {
+      "_id": "req_pontos_buscar_net",
+      "_type": "request",
+      "parentId": "fld_pontos_net",
+      "name": "GET /api/pontos-coleta/:id",
+      "method": "GET",
+      "url": "{{ base_url }}/api/pontos-coleta/1"
+    },
+    {
+      "_id": "req_pontos_criticos_net",
+      "_type": "request",
+      "parentId": "fld_pontos_net",
+      "name": "GET /api/pontos-coleta/criticos",
+      "method": "GET",
+      "url": "{{ base_url }}/api/pontos-coleta/criticos"
+    },
+    {
+      "_id": "req_pontos_criar_net",
+      "_type": "request",
+      "parentId": "fld_pontos_net",
+      "name": "POST /api/pontos-coleta",
+      "method": "POST",
+      "url": "{{ base_url }}/api/pontos-coleta",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Ecoponto Paulista\",\n  \"endereco\": \"Av. Paulista, 1000\",\n  \"cidade\": \"São Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"01310-100\",\n  \"latitude\": -23.5629,\n  \"longitude\": -46.6544,\n  \"capacidadeKg\": 500.00\n}"
+      }
+    },
+    {
+      "_id": "req_pontos_ocupacao_net",
+      "_type": "request",
+      "parentId": "fld_pontos_net",
+      "name": "PATCH /api/pontos-coleta/:id/ocupacao",
+      "method": "PATCH",
+      "url": "{{ base_url }}/api/pontos-coleta/1/ocupacao",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"ocupacaoAtual\": 420.00\n}"
+      }
+    },
+    {
+      "_id": "req_pontos_desativar_net",
+      "_type": "request",
+      "parentId": "fld_pontos_net",
+      "name": "DELETE /api/pontos-coleta/:id",
+      "method": "DELETE",
+      "url": "{{ base_url }}/api/pontos-coleta/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "fld_tipos_net",
+      "_type": "request_group",
+      "parentId": "wrk_ecotrack_net",
+      "name": " Tipos de Resíduo"
+    },
+    {
+      "_id": "req_tipos_listar_net",
+      "_type": "request",
+      "parentId": "fld_tipos_net",
+      "name": "GET /api/tipos-residuo",
+      "method": "GET",
+      "url": "{{ base_url }}/api/tipos-residuo"
+    },
+    {
+      "_id": "req_tipos_buscar_net",
+      "_type": "request",
+      "parentId": "fld_tipos_net",
+      "name": "GET /api/tipos-residuo/:id",
+      "method": "GET",
+      "url": "{{ base_url }}/api/tipos-residuo/1"
+    },
+    {
+      "_id": "req_tipos_criar_net",
+      "_type": "request",
+      "parentId": "fld_tipos_net",
+      "name": "POST /api/tipos-residuo (Admin)",
+      "method": "POST",
+      "url": "{{ base_url }}/api/tipos-residuo",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ admin_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Têxtil\",\n  \"descricao\": \"Roupas, tecidos e calçados usados\",\n  \"corLixeira\": \"ROSA\",\n  \"instrucao\": \"Doe roupas em boas condições. Para peças muito desgastadas, separe para centros de reciclagem têxtil.\"\n}"
+      }
+    },
+    {
+      "_id": "req_tipos_atualizar_net",
+      "_type": "request",
+      "parentId": "fld_tipos_net",
+      "name": "PUT /api/tipos-residuo/:id (Admin)",
+      "method": "PUT",
+      "url": "{{ base_url }}/api/tipos-residuo/7",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ admin_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Têxtil\",\n  \"descricao\": \"Roupas, tecidos, calçados e acessórios usados\",\n  \"corLixeira\": \"ROSA\",\n  \"instrucao\": \"Doe roupas em boas condições. Não descarte roupas molhadas.\"\n}"
+      }
+    },
+    {
+      "_id": "req_tipos_desativar_net",
+      "_type": "request",
+      "parentId": "fld_tipos_net",
+      "name": "DELETE /api/tipos-residuo/:id (Admin)",
+      "method": "DELETE",
+      "url": "{{ base_url }}/api/tipos-residuo/7",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ admin_token }}" }]
+    },
+    {
+      "_id": "fld_coletas_net",
+      "_type": "request_group",
+      "parentId": "wrk_ecotrack_net",
+      "name": " Coletas"
+    },
+    {
+      "_id": "req_coletas_listar_net",
+      "_type": "request",
+      "parentId": "fld_coletas_net",
+      "name": "GET /api/coletas (paginado)",
+      "method": "GET",
+      "url": "{{ base_url }}/api/coletas?pageNumber=1&pageSize=10",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "req_coletas_filtrar_status_net",
+      "_type": "request",
+      "parentId": "fld_coletas_net",
+      "name": "GET /api/coletas?status=Pendente",
+      "method": "GET",
+      "url": "{{ base_url }}/api/coletas?status=Pendente",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "req_coletas_buscar_net",
+      "_type": "request",
+      "parentId": "fld_coletas_net",
+      "name": "GET /api/coletas/:id",
+      "method": "GET",
+      "url": "{{ base_url }}/api/coletas/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "req_coletas_historico_ponto_net",
+      "_type": "request",
+      "parentId": "fld_coletas_net",
+      "name": "GET /api/coletas/ponto/:pontoColetaId",
+      "method": "GET",
+      "url": "{{ base_url }}/api/coletas/ponto/1?pageNumber=1&pageSize=10",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "req_coletas_agendar_net",
+      "_type": "request",
+      "parentId": "fld_coletas_net",
+      "name": "POST /api/coletas (agendar)",
+      "method": "POST",
+      "url": "{{ base_url }}/api/coletas",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"pontoColetaId\": 1,\n  \"tipoResiduoId\": 2,\n  \"quantidadeKg\": 15.5,\n  \"dataAgendamento\": \"2026-07-01T09:00:00\",\n  \"observacao\": \"Garrafas PET separadas e amassadas\"\n}"
+      }
+    },
+    {
+      "_id": "req_coletas_atualizar_net",
+      "_type": "request",
+      "parentId": "fld_coletas_net",
+      "name": "PUT /api/coletas/:id (atualizar status)",
+      "method": "PUT",
+      "url": "{{ base_url }}/api/coletas/1",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"Coletada\",\n  \"observacao\": \"Coleta realizada com sucesso\"\n}"
+      }
+    },
+    {
+      "_id": "req_coletas_cancelar_net",
+      "_type": "request",
+      "parentId": "fld_coletas_net",
+      "name": "DELETE /api/coletas/:id (cancelar)",
+      "method": "DELETE",
+      "url": "{{ base_url }}/api/coletas/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "fld_alertas_net",
+      "_type": "request_group",
+      "parentId": "wrk_ecotrack_net",
+      "name": " Alertas"
+    },
+    {
+      "_id": "req_alertas_abertos_net",
+      "_type": "request",
+      "parentId": "fld_alertas_net",
+      "name": "GET /api/alertas (Admin/Coletor)",
+      "method": "GET",
+      "url": "{{ base_url }}/api/alertas?pageNumber=1&pageSize=10&apenasAbertos=true",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ admin_token }}" }]
+    },
+    {
+      "_id": "req_alertas_contador_net",
+      "_type": "request",
+      "parentId": "fld_alertas_net",
+      "name": "GET /api/alertas/contador",
+      "method": "GET",
+      "url": "{{ base_url }}/api/alertas/contador",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ admin_token }}" }]
+    },
+    {
+      "_id": "req_alertas_resolver_net",
+      "_type": "request",
+      "parentId": "fld_alertas_net",
+      "name": "PATCH /api/alertas/:id/resolver",
+      "method": "PATCH",
+      "url": "{{ base_url }}/api/alertas/1/resolver",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ admin_token }}" }]
+    },
+    {
+      "_id": "fld_notificacoes_net",
+      "_type": "request_group",
+      "parentId": "wrk_ecotrack_net",
+      "name": " Notificações"
+    },
+    {
+      "_id": "req_notif_listar_net",
+      "_type": "request",
+      "parentId": "fld_notificacoes_net",
+      "name": "GET /api/notificacoes (paginado)",
+      "method": "GET",
+      "url": "{{ base_url }}/api/notificacoes?pageNumber=1&pageSize=10",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "req_notif_nao_lidas_net",
+      "_type": "request",
+      "parentId": "fld_notificacoes_net",
+      "name": "GET /api/notificacoes?apenasNaoLidas=true",
+      "method": "GET",
+      "url": "{{ base_url }}/api/notificacoes?apenasNaoLidas=true",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "req_notif_contador_net",
+      "_type": "request",
+      "parentId": "fld_notificacoes_net",
+      "name": "GET /api/notificacoes/contador",
+      "method": "GET",
+      "url": "{{ base_url }}/api/notificacoes/contador",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "req_notif_ler_net",
+      "_type": "request",
+      "parentId": "fld_notificacoes_net",
+      "name": "PATCH /api/notificacoes/:id/ler",
+      "method": "PATCH",
+      "url": "{{ base_url }}/api/notificacoes/1/ler",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "req_notif_ler_todas_net",
+      "_type": "request",
+      "parentId": "fld_notificacoes_net",
+      "name": "PATCH /api/notificacoes/ler-todas",
+      "method": "PATCH",
+      "url": "{{ base_url }}/api/notificacoes/ler-todas",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    },
+    {
+      "_id": "fld_relatorios_net",
+      "_type": "request_group",
+      "parentId": "wrk_ecotrack_net",
+      "name": " Relatórios"
+    },
+    {
+      "_id": "req_rel_listar_net",
+      "_type": "request",
+      "parentId": "fld_relatorios_net",
+      "name": "GET /api/relatorios (Admin/Empresa)",
+      "method": "GET",
+      "url": "{{ base_url }}/api/relatorios?pageNumber=1&pageSize=10",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ admin_token }}" }]
+    },
+    {
+      "_id": "req_rel_buscar_net",
+      "_type": "request",
+      "parentId": "fld_relatorios_net",
+      "name": "GET /api/relatorios/:id",
+      "method": "GET",
+      "url": "{{ base_url }}/api/relatorios/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ admin_token }}" }]
+    },
+    {
+      "_id": "req_rel_gerar_net",
+      "_type": "request",
+      "parentId": "fld_relatorios_net",
+      "name": "POST /api/relatorios (gerar)",
+      "method": "POST",
+      "url": "{{ base_url }}/api/relatorios",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ admin_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Relatório de Reciclagem - Junho 2026\",\n  \"descricao\": \"Consolidado mensal de coletas e impacto ambiental\",\n  \"periodoInicio\": \"2026-06-01\",\n  \"periodoFim\": \"2026-06-18\"\n}"
+      }
+    },
+    {
+      "_id": "fld_dashboard_net",
+      "_type": "request_group",
+      "parentId": "wrk_ecotrack_net",
+      "name": " Dashboard"
+    },
+    {
+      "_id": "req_dashboard_net",
+      "_type": "request",
+      "parentId": "fld_dashboard_net",
+      "name": "GET /api/dashboard",
+      "method": "GET",
+      "url": "{{ base_url }}/api/dashboard",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ token }}" }]
+    }
+  ]
+}

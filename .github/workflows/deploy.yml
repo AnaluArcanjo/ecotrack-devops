@@ -1,0 +1,138 @@
+# =============================================================================
+#  Workflow reutilizável de deploy (chamado pelo ci-cd.yml)
+#  Mesmo processo para STAGING e PRODUÇÃO — só mudam as variáveis/segredos do
+#  GitHub Environment, o arquivo de override do Compose e a tag promovida.
+# =============================================================================
+name: Deploy (reutilizável)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "staging ou production"
+        required: true
+        type: string
+      image:
+        description: "Imagem imutável (ghcr.io/owner/repo:sha-xxxxxxx)"
+        required: true
+        type: string
+      image_repo:
+        description: "Repositório da imagem (ghcr.io/owner/repo)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+      url: http://localhost:${{ inputs.environment == 'production' && '8080' || '8081' }}/swagger
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      EXPECTED_ENV: ${{ inputs.environment == 'production' && 'Production' || 'Staging' }}
+      API_PORT: ${{ inputs.environment == 'production' && '8080' || '8081' }}
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # As senhas vêm dos Secrets do GitHub Environment (staging/production).
+      # Se não estiverem cadastradas, usa valores padrão de demonstração.
+      - name: Gerar arquivo de variáveis do ambiente
+        shell: bash
+        env:
+          SA_PASSWORD: ${{ secrets.SA_PASSWORD || (inputs.environment == 'production' && 'Producao@EcoTrack123' || 'Staging@EcoTrack123') }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET || format('{0}-ecotrack-ci-jwt-secret-key-with-at-least-64-characters-for-hmac-sha256', inputs.environment) }}
+          DB_NAME: ${{ vars.DB_NAME || (inputs.environment == 'production' && 'EcoTrackDb' || 'EcoTrackDb_Staging') }}
+          JWT_EXPIRATION_MINUTES: ${{ vars.JWT_EXPIRATION_MINUTES || (inputs.environment == 'production' && '60' || '120') }}
+        run: |
+          mkdir -p deploy
+          cat > "deploy/${ENVIRONMENT}.env" <<EOF
+          API_IMAGE=${{ inputs.image }}
+          APP_VERSION=${GITHUB_SHA}
+          API_PORT=${API_PORT}
+          DB_PORT=${{ inputs.environment == 'production' && '1433' || '14331' }}
+          SA_PASSWORD=${SA_PASSWORD}
+          DB_NAME=${DB_NAME}
+          JWT_SECRET=${JWT_SECRET}
+          JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+          EOF
+          echo "Arquivo deploy/${ENVIRONMENT}.env gerado (segredos omitidos do log)."
+
+      - name: Deploy com Docker Compose
+        run: bash scripts/deploy.sh "$ENVIRONMENT"
+
+      - name: Smoke tests no ambiente
+        shell: bash
+        run: |
+          export SMOKE_REPORT=smoke-report.md
+          {
+            echo "## ✅ Smoke tests — ${EXPECTED_ENV}"
+            echo "Imagem: \`${{ inputs.image }}\`  "
+            echo "Commit: \`${GITHUB_SHA::7}\`  "
+            echo "Health: \`$(curl -s http://localhost:${API_PORT}/health)\`"
+            echo ""
+          } > "$SMOKE_REPORT"
+          set +e
+          bash scripts/smoke-test.sh "http://localhost:${API_PORT}" "$EXPECTED_ENV"
+          status=$?
+          set -e
+          cat "$SMOKE_REPORT" >> "$GITHUB_STEP_SUMMARY"
+          exit $status
+
+      - name: Promover imagem (tag ${{ inputs.environment }})
+        run: |
+          docker buildx imagetools create \
+            -t "${{ inputs.image_repo }}:${ENVIRONMENT}" \
+            "${{ inputs.image }}"
+          echo "🏷️ Imagem promovida: \`${{ inputs.image_repo }}:${ENVIRONMENT}\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Coletar evidências (status e logs dos containers)
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p deploy-logs
+          C="docker compose -p ecotrack-${ENVIRONMENT} --env-file deploy/${ENVIRONMENT}.env -f docker-compose.yml"
+          [[ "$ENVIRONMENT" == "production" ]] && C="$C -f docker-compose.prod.yml" || C="$C -f docker-compose.staging.yml"
+          $C ps                       > deploy-logs/containers.txt 2>&1 || true
+          $C logs --no-color api      > deploy-logs/api.log 2>&1 || true
+          $C logs --no-color sqlserver > deploy-logs/sqlserver.log 2>&1 || true
+          docker images               > deploy-logs/images.txt 2>&1 || true
+          curl -s "http://localhost:${API_PORT}/health" > deploy-logs/health.json || true
+          curl -s "http://localhost:${API_PORT}/swagger/v1/swagger.json" > deploy-logs/swagger.json || true
+          cp smoke-report.md deploy-logs/ 2>/dev/null || true
+          {
+            echo ""
+            echo "### 📦 Containers em execução (${EXPECTED_ENV})"
+            echo '```'
+            cat deploy-logs/containers.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload das evidências
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencias-${{ inputs.environment }}
+          path: deploy-logs
+          retention-days: 30
+
+      - name: Encerrar ambiente do runner
+        if: always()
+        shell: bash
+        run: |
+          OVERRIDE=docker-compose.staging.yml
+          [[ "$ENVIRONMENT" == "production" ]] && OVERRIDE=docker-compose.prod.yml
+          docker compose -p "ecotrack-${ENVIRONMENT}" --env-file "deploy/${ENVIRONMENT}.env" \
+            -f docker-compose.yml -f "$OVERRIDE" down -v || true

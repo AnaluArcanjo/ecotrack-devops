@@ -1,0 +1,24 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+*.dll
+*.pdb
+
+## Test results
+TestResults/
+*.trx
+coverage*.json
+coverage*.xml
+
+## Variáveis de ambiente reais (só os .example vão para o Git)
+.env
+deploy/*.env
+deploy-logs/
+
+.DS_Store
+
+~$*
