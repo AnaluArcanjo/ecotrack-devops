@@ -166,7 +166,7 @@ jobs:
         id: vars
         shell: bash
         run: |
-          REPO="ghcr.io/${GITHUB_REPOSITORY,,}"
+          REPO="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/ecotrack-api"
           echo "image_repo=$REPO" >> "$GITHUB_OUTPUT"
           echo "image=$REPO:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
