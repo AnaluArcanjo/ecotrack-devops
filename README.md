@@ -52,7 +52,7 @@ EcoTrackNet-DevOps/
 ```bash
 # 1. Clonar o repositório
 git clone https://github.com/AnaluArcanjo/ecotrack-devops.git
-cd cd ecotrack-devops
+cd ecotrack-devops
 
 # 2. Criar o arquivo de variáveis de ambiente
 cp .env.example .env
